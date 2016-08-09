@@ -1,58 +1,50 @@
-# Programa-R
+## Functions that cache the inverse of a matrix
+##
+## Usage example:
+##
+## > source('cachematrix.R')
+## > m <- makeCacheMatrix(matrix(c(2, 0, 0, 2), c(2, 2)))
+## > cacheSolve(m)
+## [,1] [,2]
+## [1,]  0.5  0.0
+## [2,]  0.0  0.5
 
-# Exemplo usado:
-# > x <- matrix(rnorm(16), nrow = 4)          
-# > cx <- makeCacheMatrix(x)                  
-# > cx$get()                                  
-# > cacheSolve(cx)                            
-# > cacheSolve(cx)                            
-#                                             
+## Create a special "matrix", which is a list containing
+## a function to
+##   - set the value of the matrix
+##   - get the value of the matrix
+##   - set the value of the inverse matrix
+##   - get the value of the inverse matrix
 
-# makeCacheMatrix: return a list of functions to:
-# 1. Set the value of the matrix
-# 2. Get the value of the matrix
-# 3. Set the value of the inverse
-# 4. Get the value of the inverse
 makeCacheMatrix <- function(x = matrix()) {
-    # inv will store the cached inverse matrix
-    inv <- NULL
-
-    # Setter for the matrix
+    i <- NULL
     set <- function(y) {
         x <<- y
-        inv <<- NULL
+        i <<- NULL
     }
-    # Getter for the matrix
     get <- function() x
-
-    # Setter for the inverse
-    setinv <- function(inverse) inv <<- inverse
-    # Getter for the inverse
-    getinv <- function() inv
-
-    # Return the matrix with our newly defined functions
-    list(set = set, get = get, setinv = setinv, getinv = getinv)
+    setinverse <- function(inv) i <<- inv
+    getinverse <- function() i
+    list(
+        set = set,
+        get = get,
+        setinverse = setinverse,
+        getinverse = getinverse
+    )
 }
 
 
-# cacheSolve: Compute the inverse of the matrix. If the inverse is already
-# calculated before, it returns the cached inverse.
+## Calculate the inverse of the special "matrix" created with the above
+## function, reusing cached result if it is available
+
 cacheSolve <- function(x, ...) {
-    inv <- x$getinv()
-
-    # If the inverse is already calculated, return it
-    if (!is.null(inv)) {
+    i <- x$getinverse()
+    if(!is.null(i)) {
         message("getting cached data")
-        return(inv)
+        return(i)
     }
-
-    # The inverse is not yet calculated, so we calculate it
-    data <- x$get()
-    inv <- solve(data, ...)
-
-    # Cache the inverse
-    x$setinv(inv)
-
-    # Return it
-    inv
+    m <- x$get()
+    i <- solve(m, ...)
+    x$setinverse(i)
+    i
 }
